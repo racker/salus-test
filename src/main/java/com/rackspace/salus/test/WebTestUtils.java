@@ -32,6 +32,7 @@ public class WebTestUtils {
    * The default Spring Boot error handler is not registered when using {@link MockMvc},
    * so this custom {@link ResultMatcher} encapsulates validation of the resolved exception
    * of the MVC result.
+   * Note that this only works for field validations, not class validations
    * <p>
    *   The following is an example of how this result matcher can be used:
    * </p>
@@ -67,6 +68,30 @@ public class WebTestUtils {
     };
   }
 
+  /**
+   * Checks the error message returned by a class validation failure.
+   * Note that this only works for class validations, not field validations
+   * <p>
+   *   The following is an example of how this result matcher can be used:
+   * </p>
+   * <pre>
+   DetailedMonitorInput create = setupCreateMonitorTest();
+   create.setDetails(new LocalMonitorDetails().setPlugin(new Mem()))
+   .setLabelSelector(null)
+   .setResourceId("");
+
+   mockMvc.perform(post(url)
+   .content(objectMapper.writeValueAsString(create))
+   .contentType(MediaType.APPLICATION_JSON)
+   .characterEncoding(StandardCharsets.UTF_8.name()))
+   .andExpect(status().isBadRequest())
+   .andExpect(classValidationError(ValidCreateMonitor.DEFAULT_MESSAGE));
+
+   * </pre>
+   *
+   * @param expectedMessage the expected default message of the failed validation
+   * @return the {@link ResultMatcher}
+   */
   public static ResultMatcher classValidationError(String expectedMessage) {
     return mvcResult -> {
       assertThat(mvcResult.getResolvedException())
