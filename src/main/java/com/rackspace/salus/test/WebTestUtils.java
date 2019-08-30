@@ -18,6 +18,7 @@ package com.rackspace.salus.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.validation.FieldError;
@@ -100,6 +101,26 @@ public class WebTestUtils {
       final String actualMessage = ((MethodArgumentNotValidException) mvcResult
           .getResolvedException()).getMessage();
       assertThat(actualMessage).contains(expectedMessage);
+    };
+  }
+
+  /**
+   * Checks the error condition that typically occurs when a JSON body cannot be parsed due to
+   * JSON syntax issue or unsupported deserialization. Specifically, it is checking for
+   * {@link HttpMessageNotReadableException}
+   * @param expectedMessagePart since exceptions of this type usually have a deep cause-chain, this
+   * parameter is used to partially match the exception's message
+   * @return the {@link ResultMatcher}
+   */
+  public static ResultMatcher httpMessageNotReadable(String expectedMessagePart) {
+    return mvcResult -> {
+      assertThat(mvcResult.getResolvedException())
+          .isInstanceOf(HttpMessageNotReadableException.class);
+
+      final HttpMessageNotReadableException resolvedException = (HttpMessageNotReadableException) mvcResult
+          .getResolvedException();
+
+      assertThat(resolvedException.getMessage()).contains(expectedMessagePart);
     };
   }
 }
