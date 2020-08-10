@@ -1,0 +1,8 @@
+# This profile specific configuration will get activated via @EnableTestContainersDatabase
+spring:
+  datasource:
+    # See https://www.testcontainers.org/modules/databases/#database-containers-launched-via-jdbc-url-scheme
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+    # This version here dictates the container version, so the major.minor should at least match
+    # what is used in deployment.
+    url: jdbc:tc:mysql:5.7.29:///testdb
